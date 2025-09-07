@@ -31,12 +31,17 @@ const CourseCard: React.FC<CourseCardProps> = ({ id, title, description, thumbna
       <div className="p-4">
         <h3 className="text-xl font-semibold mb-2 text-green-600">{title}</h3>
         <p className="text-gray-600 mb-4 line-clamp-3">{description}</p>
-        <Link
-          href={`/courses/${id}`}
-          className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md inline-block transition-colors"
-        >
-          View Course
-        </Link>
+        <Link 
+      href={`/login?redirect=/courses/${id}`} 
+      className="block bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition transform hover:scale-105"
+    >
+      <div className="p-6">
+        <div className="flex items-center text-blue-600 font-medium">
+          <i className="fas fa-lock mr-2"></i>
+          <span>Login to view modules</span>
+        </div>
+      </div>
+    </Link>
       </div>
     </div>
   );

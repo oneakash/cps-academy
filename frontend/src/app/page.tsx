@@ -1,11 +1,11 @@
-import type { Metadata } from 'next';
-import { coursesAPI } from '@/services/api';
-import CourseCard from '@/components/CourseCard';
-import { extractPlainText } from '@/lib/extract-text';
+import type { Metadata } from "next";
+import { coursesAPI } from "@/services/api";
+import CourseCard from "@/components/CourseCard";
+import { extractPlainText } from "@/lib/extract-text";
 
 export const metadata: Metadata = {
-  title: 'CPS Academy — Courses',
-  description: 'Browse public course previews from CPS Academy.',
+  title: "CPS Academy — Courses",
+  description: "Browse public course previews from CPS Academy.",
 };
 
 async function getCourseSummaries(page = 1, pageSize = 12) {
@@ -23,7 +23,7 @@ async function getCourseSummaries(page = 1, pageSize = 12) {
 
     return {
       id: item.id,
-      title: item.Title || 'Untitled Course',
+      title: item.Title || "Untitled Course",
       description: extractPlainText(item.Description),
       thumbnail,
     };
@@ -40,13 +40,14 @@ export default async function HomePage({
 }: {
   searchParams: { page?: string };
 }) {
-  const currentPage = Math.max(1, Number(searchParams.page) || 1);
+  const params = await searchParams;
+  const currentPage = Math.max(1, Number(params.page) || 1);
 
   let response: any;
   try {
     response = await getCourseSummaries(currentPage, 12);
   } catch (e) {
-    console.error('Failed to load courses:', e);
+    console.error("Failed to load courses:", e);
     return (
       <main className="mx-auto max-w-4xl px-4 py-16 text-center">
         <h1 className="text-3xl font-bold">CPS Academy</h1>
@@ -66,31 +67,41 @@ export default async function HomePage({
   return (
     <main>
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-r from-blue-700 via-blue-600 to-blue-500 text-white py-24 overflow-hidden">
-        <div className="mx-auto max-w-5xl text-center px-6 relative z-10">
-          <h1 className="text-4xl sm:text-5xl font-extrabold leading-tight">
-            Unlock Your Potential with CPS Academy
+      <section className="relative bg-gradient-to-r from-blue-700 via-blue-600 to-blue-500 text-white py-28 overflow-hidden">
+        <div className="mx-auto max-w-6xl text-center px-6 relative z-10">
+          <h1 className="text-5xl sm:text-6xl font-extrabold leading-tight drop-shadow-md">
+            Unlock Your Potential with{" "}
+            <span className="text-yellow-300">CPS Academy</span>
           </h1>
-          <p className="mt-6 text-lg text-blue-100 max-w-2xl mx-auto">
-            Learn in-demand skills from expert instructors. Explore, enroll, and grow your knowledge with our curated courses.
+          <p className="mt-6 text-lg sm:text-xl text-blue-100 max-w-2xl mx-auto leading-relaxed">
+            Learn in-demand skills from expert instructors. Explore, enroll, and
+            grow your knowledge with our curated courses.
           </p>
-          <div className="mt-10 flex justify-center gap-4">
+
+          <div className="mt-12 flex flex-wrap justify-center gap-4">
             <a
-              href="/register"
-              className="bg-yellow-400 text-black px-6 py-3 rounded-xl font-semibold shadow-md hover:bg-yellow-500 transition"
+              href="/signup"
+              className="bg-yellow-400 text-black px-7 py-3 rounded-xl font-semibold shadow-lg hover:bg-yellow-500 hover:scale-105 transition transform"
             >
-              Join Free
+              Sign Up
+            </a>
+            <a
+              href="/login"
+              className="bg-white text-blue-700 px-7 py-3 rounded-xl font-semibold shadow-lg hover:bg-gray-100 hover:scale-105 transition transform"
+            >
+              Login
             </a>
             <a
               href="#courses"
-              className="border border-white px-6 py-3 rounded-xl font-semibold hover:bg-white hover:text-blue-700 transition"
+              className="border border-white px-7 py-3 rounded-xl font-semibold hover:bg-white hover:text-blue-700 hover:scale-105 transition transform"
             >
               Browse Courses
             </a>
           </div>
         </div>
+
         {/* Decorative blur circle */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[40rem] h-[40rem] bg-blue-800 opacity-20 blur-3xl rounded-full"></div>
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[40rem] h-[40rem] bg-blue-900 opacity-20 blur-3xl rounded-full"></div>
       </section>
 
       {/* Courses Section */}
