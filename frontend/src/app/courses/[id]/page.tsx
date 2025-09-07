@@ -8,32 +8,19 @@ import RoleGuard from '@/components/RoleGuard';
 
 interface Module {
   id: number;
-  attributes: {
-    name: string;
-    details: string;
-    classesCount: number;
-    topics: string[];
-  };
+  Name: string;
+  Details: any[];
+  NumberOfClasses: number;
+  TopicsCovered: any;
 }
 
 interface Course {
   id: number;
-  attributes: {
-    title: string;
-    description: string;
-    thumbnail: {
-      data: {
-        attributes: {
-          url: string;
-          alternativeText: string;
-        };
-      };
-    };
-    modules: {
-      data: Module[];
-    };
-    accessRoles: string[]; // e.g., ['student', 'manager']
-  };
+  Title: string;
+  Description: any[];
+  Thumbnail: any[];
+  IsActive: boolean;
+  modules: Module[];
 }
 
 export default function CourseDetailPage() {
@@ -50,16 +37,17 @@ export default function CourseDetailPage() {
         setError('');
 
         const jwt = localStorage.getItem('jwt');
-        if (!jwt) {
-          throw new Error('Authentication required');
+        const headers: any = {
+          'Content-Type': 'application/json',
+        };
+
+        if (jwt) {
+          headers['Authorization'] = `Bearer ${jwt}`;
         }
 
-        const res = await fetch(`${process.env.NEXT_PUBLIC_STRAPI_URL}/api/courses/${id}?populate[thumbnail]=*&populate[modules]=*`, {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_STRAPI_URL}/api/courses/${id}?populate=*`, {
           method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${jwt}`,
-          },
+          headers,
         });
 
         if (!res.ok) {
@@ -74,7 +62,6 @@ export default function CourseDetailPage() {
 
         const data = await res.json();
 
-        // Strapi wraps response in { data: { ... } }
         if (data?.data) {
           setCourse(data.data);
         } else {
@@ -92,6 +79,28 @@ export default function CourseDetailPage() {
       fetchCourse();
     }
   }, [id]);
+
+  const extractPlainText = (richText: any[]): string => {
+    if (!Array.isArray(richText)) return '';
+    return richText
+      .map((node) => {
+        if (node.type === 'paragraph' && node.children) {
+          return node.children
+            .filter((child: any) => child.type === 'text')
+            .map((child: any) => child.text)
+            .join(' ');
+        }
+        return '';
+      })
+      .filter(Boolean)
+      .join(' ')
+      .trim();
+  };
+
+  const getUserRoleName = () => {
+    if (!user?.role) return 'authenticated';
+    return user.role.type || user.role.name || 'authenticated';
+  };
 
   if (isLoading) {
     return (
@@ -116,6 +125,11 @@ export default function CourseDetailPage() {
     );
   }
 
+  const thumbnail = course.Thumbnail?.[0];
+  const imageUrl = thumbnail?.url
+    ? `${process.env.NEXT_PUBLIC_STRAPI_URL}${thumbnail.url}`
+    : 'https://images.pexels.com/photos/159711/books-bookstore-book-reading-159711.jpeg?auto=compress&cs=tinysrgb&w=800';
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="container mx-auto px-4 py-8">
@@ -134,7 +148,7 @@ export default function CourseDetailPage() {
               </Link>
             </li>
             <li>/</li>
-            <li className="text-gray-800 font-medium">{course.attributes.title}</li>
+            <li className="text-gray-800 font-medium">{course.Title}</li>
           </ol>
         </nav>
 
@@ -142,58 +156,90 @@ export default function CourseDetailPage() {
         <div className="bg-white rounded-lg shadow-lg overflow-hidden">
           {/* Thumbnail */}
           <img
-            src={`${process.env.NEXT_PUBLIC_STRAPI_URL}${course.attributes.thumbnail.data?.attributes.url}`}
-            alt={course.attributes.thumbnail.data?.attributes.alternativeText || course.attributes.title}
+            src={imageUrl}
+            alt={thumbnail?.alternativeText || course.Title}
             className="w-full h-64 md:h-80 object-cover"
           />
 
           <div className="p-6">
             {/* Title & Description */}
             <h1 className="text-3xl font-bold text-gray-900 mb-3">
-              {course.attributes.title}
+              {course.Title}
             </h1>
             <p className="text-gray-600 leading-relaxed mb-6">
-              {course.attributes.description}
+              {extractPlainText(course.Description)}
             </p>
 
+            {/* Course Status */}
+            <div className="mb-6 flex items-center">
+              <i className={`fas ${course.IsActive ? 'fa-check-circle text-green-500' : 'fa-pause-circle text-orange-500'} mr-2`}></i>
+              <span className={`font-medium ${course.IsActive ? 'text-green-700' : 'text-orange-700'}`}>
+                {course.IsActive ? 'Course Active' : 'Coming Soon'}
+              </span>
+            </div>
+
             {/* Modules Section - Only for authorized roles */}
-            <RoleGuard allowedRoles={['student', 'social_media_manager', 'developer', 'manager']}>
+            <RoleGuard 
+              allowedRoles={['student', 'social_media_manager', 'developer']}
+              fallback={
+                <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-6 text-center">
+                  <i className="fas fa-lock text-blue-400 text-4xl mb-4"></i>
+                  <h3 className="text-xl font-semibold text-blue-900 mb-2">
+                    Enroll to Access Full Content
+                  </h3>
+                  <p className="text-blue-700 mb-5">
+                    Unlock all modules, lessons, and resources by enrolling in this course.
+                  </p>
+                  <p className="text-blue-600 text-sm mb-4">
+                    Your current role: <span className="font-medium">{getUserRoleName()}</span>
+                  </p>
+                  <button
+                    onClick={() => alert('Enrollment feature coming soon!')}
+                    className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-lg transition"
+                  >
+                    Enroll Now
+                  </button>
+                </div>
+              }
+            >
               <section className="mb-8">
                 <h2 className="text-2xl font-semibold text-gray-800 mb-5 border-b pb-2">
                   Course Modules
                 </h2>
                 <div className="space-y-6">
-                  {course.attributes.modules.data.length > 0 ? (
-                    course.attributes.modules.data.map((module) => (
+                  {course.modules && course.modules.length > 0 ? (
+                    course.modules.map((module) => (
                       <div
                         key={module.id}
                         className="border border-gray-200 rounded-lg p-5 hover:shadow-md transition-shadow"
                       >
                         <h3 className="text-xl font-medium text-gray-900 mb-2">
-                          {module.attributes.name}
+                          {module.Name}
                         </h3>
                         <p className="text-gray-600 mb-3">
-                          {module.attributes.details}
+                          {extractPlainText(module.Details)}
                         </p>
                         <div className="flex items-center gap-4 text-sm text-gray-500 mb-3">
                           <span className="flex items-center">
                             <i className="fas fa-chalkboard-teacher mr-1"></i>
-                            {module.attributes.classesCount} classes
+                            {module.NumberOfClasses} classes
                           </span>
                         </div>
-                        <div>
-                          <h4 className="font-medium text-gray-700 mb-2">Topics:</h4>
-                          <div className="flex flex-wrap gap-2">
-                            {module.attributes.topics.map((topic, index) => (
-                              <span
-                                key={index}
-                                className="bg-blue-100 text-blue-800 text-xs font-semibold px-3 py-1 rounded-full"
-                              >
-                                {topic}
-                              </span>
-                            ))}
+                        {module.TopicsCovered && module.TopicsCovered.topics && (
+                          <div>
+                            <h4 className="font-medium text-gray-700 mb-2">Topics:</h4>
+                            <div className="flex flex-wrap gap-2">
+                              {module.TopicsCovered.topics.map((topic: string, index: number) => (
+                                <span
+                                  key={index}
+                                  className="bg-blue-100 text-blue-800 text-xs font-semibold px-3 py-1 rounded-full"
+                                >
+                                  {topic}
+                                </span>
+                              ))}
+                            </div>
                           </div>
-                        </div>
+                        )}
                       </div>
                     ))
                   ) : (
@@ -201,25 +247,6 @@ export default function CourseDetailPage() {
                   )}
                 </div>
               </section>
-            </RoleGuard>
-
-            {/* Enrollment CTA for Normal Users */}
-            <RoleGuard allowedRoles={['normal']}>
-              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-6 text-center">
-                <i className="fas fa-lock text-blue-400 text-4xl mb-4"></i>
-                <h3 className="text-xl font-semibold text-blue-900 mb-2">
-                  Enroll to Access Full Content
-                </h3>
-                <p className="text-blue-700 mb-5">
-                  Unlock all modules, lessons, and resources by enrolling in this course.
-                </p>
-                <button
-                  onClick={() => alert('Enrollment feature coming soon!')}
-                  className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-lg transition"
-                >
-                  Enroll Now
-                </button>
-              </div>
             </RoleGuard>
           </div>
         </div>

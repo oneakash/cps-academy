@@ -4,7 +4,8 @@
   "info": {
     "singularName": "module",
     "pluralName": "modules",
-    "displayName": "Module"
+    "displayName": "Module",
+    "description": "Course modules with detailed information"
   },
   "options": {
     "draftAndPublish": true
@@ -12,22 +13,31 @@
   "pluginOptions": {},
   "attributes": {
     "Name": {
-      "type": "string"
+      "type": "string",
+      "required": true
     },
     "Details": {
       "type": "blocks"
     },
     "NumberOfClasses": {
-      "type": "integer"
+      "type": "integer",
+      "default": 0
     },
     "TopicsCovered": {
-      "type": "json"
+      "type": "json",
+      "default": {
+        "topics": []
+      }
     },
     "course": {
       "type": "relation",
       "relation": "manyToOne",
       "target": "api::course.course",
       "inversedBy": "modules"
+    },
+    "Order": {
+      "type": "integer",
+      "default": 0
     }
   }
 }

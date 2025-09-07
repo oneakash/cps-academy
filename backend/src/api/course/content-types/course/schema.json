@@ -4,7 +4,8 @@
   "info": {
     "singularName": "course",
     "pluralName": "courses",
-    "displayName": "Course"
+    "displayName": "Course",
+    "description": "Course content with modules and role-based access"
   },
   "options": {
     "draftAndPublish": true
@@ -12,7 +13,8 @@
   "pluginOptions": {},
   "attributes": {
     "Title": {
-      "type": "string"
+      "type": "string",
+      "required": true
     },
     "Description": {
       "type": "blocks"
@@ -28,13 +30,18 @@
       ]
     },
     "IsActive": {
-      "type": "boolean"
+      "type": "boolean",
+      "default": true
     },
     "modules": {
       "type": "relation",
       "relation": "oneToMany",
       "target": "api::module.module",
       "mappedBy": "course"
+    },
+    "AccessRoles": {
+      "type": "json",
+      "default": ["student", "social_media_manager", "developer"]
     }
   }
 }

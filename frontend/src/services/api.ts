@@ -42,8 +42,71 @@ export const authAPI = {
       jwt: data.jwt,
     };
   },
-  register: (username: string, email: string, password: string) =>
-    api.post("/api/auth/local/register", { username, email, password }),
+  async register(username: string, email: string, password: string) {
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/auth/local/register`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ username, email, password }),
+      }
+    );
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data.error?.message || "Registration failed");
+    }
+
+    return {
+      user: data.user,
+      jwt: data.jwt,
+    };
+  },
+
+  async forgotPassword(email: string) {
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/auth/forgot-password`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email }),
+      }
+    );
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data.error?.message || "Failed to send reset email");
+    }
+
+    return data;
+  },
+
+  async resetPassword(code: string, password: string, passwordConfirmation: string) {
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/auth/reset-password`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ code, password, passwordConfirmation }),
+      }
+    );
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data.error?.message || "Failed to reset password");
+    }
+
+    return data;
+  },
 };
 
 export const coursesAPI = {
