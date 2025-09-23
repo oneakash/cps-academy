@@ -41,7 +41,9 @@
     },
     "AccessRoles": {
       "type": "json",
-      "default": ["student", "social_media_manager", "developer"]
+      "default": {
+        "roles": ["student", "social_media_manager", "developer"]
+      }
     }
   }
 }

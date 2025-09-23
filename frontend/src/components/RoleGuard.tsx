@@ -11,6 +11,11 @@ interface RoleGuardProps {
 const RoleGuard: React.FC<RoleGuardProps> = ({ children, allowedRoles, fallback }) => {
   const { user } = useAuth();
 
+  // Allow admin access to everything
+  if (user?.role?.type === 'admin' || user?.role?.name === 'Super Admin') {
+    return <>{children}</>;
+  }
+
   if (!user) {
     return fallback || (
       <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 text-center">

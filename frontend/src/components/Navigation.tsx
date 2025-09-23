@@ -45,15 +45,20 @@ export default function Navigation() {
                 <Link href="/courses" className="text-gray-700 hover:text-blue-600 transition">
                   Courses
                 </Link>
+                {(user.role?.type === 'admin' || user.role?.name === 'Super Admin') && (
+                  <Link href="/admin" className="text-gray-700 hover:text-blue-600 transition">
+                    Admin Panel
+                  </Link>
+                )}
               </>
             )}
 
             {user ? (
               <div className="flex items-center space-x-4">
                 <div className="flex items-center space-x-2">
-                  <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                  <Link href="/profile" className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center hover:bg-blue-200 transition">
                     <i className="fas fa-user text-blue-600 text-sm"></i>
-                  </div>
+                  </Link>
                   <div className="text-sm">
                     <p className="font-medium text-gray-900">{user.username}</p>
                     <p className="text-gray-500 text-xs">{getUserRoleName()}</p>
@@ -123,20 +128,36 @@ export default function Navigation() {
                   >
                     Courses
                   </Link>
+                  {(user.role?.type === 'admin' || user.role?.name === 'Super Admin') && (
+                    <Link
+                      href="/admin"
+                      className="block px-3 py-2 text-gray-700 hover:text-blue-600 transition"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      Admin Panel
+                    </Link>
+                  )}
                 </>
               )}
 
               {user ? (
                 <div className="px-3 py-2 border-t border-gray-200 mt-2">
                   <div className="flex items-center space-x-2 mb-3">
-                    <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                    <Link href="/profile" className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center hover:bg-blue-200 transition" onClick={() => setIsMenuOpen(false)}>
                       <i className="fas fa-user text-blue-600 text-sm"></i>
-                    </div>
+                    </Link>
                     <div className="text-sm">
                       <p className="font-medium text-gray-900">{user.username}</p>
                       <p className="text-gray-500 text-xs">{getUserRoleName()}</p>
                     </div>
                   </div>
+                  <Link
+                    href="/profile"
+                    className="block w-full text-center bg-blue-100 text-blue-700 px-4 py-2 rounded-lg hover:bg-blue-200 transition text-sm mb-2"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    View Profile
+                  </Link>
                   <button
                     onClick={() => {
                       handleLogout();
