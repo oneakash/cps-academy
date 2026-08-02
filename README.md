@@ -253,7 +253,3 @@ For support and questions:
 - **v1.0.0** - Initial release with core features
 - **v1.1.0** - Enhanced role management and UI improvements
 - **v1.2.0** - Added course modules and advanced filtering
-
----
-
-Built with ❤️ by the CPS Academy Team
